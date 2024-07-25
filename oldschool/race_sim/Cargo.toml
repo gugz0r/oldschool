@@ -1,9 +1,0 @@
-[package]
-name = "race_sim"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-ggez = "0.6"
-nalgebra = "0.29.0"
-glam = "0.18.0"
