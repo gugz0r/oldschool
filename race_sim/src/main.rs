@@ -7,7 +7,7 @@ mod draw;
 use ggez::conf::Conf;
 use ggez::event;
 use ggez::{ContextBuilder, GameResult};
-use game_state::GameState;
+use crate::game_state::GameState;
 
 fn main() -> GameResult {
     let mut conf = Conf::new();
