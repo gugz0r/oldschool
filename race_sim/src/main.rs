@@ -1,7 +1,8 @@
-use ggez::{conf::WindowMode, conf::WindowSetup, ContextBuilder, GameResult};
+use env_logger;
+use ggez::conf::{WindowMode, WindowSetup};
 use ggez::event;
-use ggez::conf::Conf;
-
+use ggez::{ContextBuilder, GameResult};
+use log::{error, info};
 
 mod camera;
 mod draw;
@@ -12,24 +13,34 @@ mod tiles;
 use game_state::GameState;
 
 fn main() -> GameResult {
-    let (mut ctx, event_loop) = ContextBuilder::new("race_sim", "Author")
-        .window_mode(WindowMode::default())
+    env_logger::init();
+
+    info!("Starting the game");
+
+    let (mut ctx, event_loop) = match ContextBuilder::new("race_sim", "gugz0r")
+        .window_mode(WindowMode::default().dimensions(800.0, 600.0))
         .window_setup(WindowSetup::default().title("Race Simulation"))
         .add_resource_path("./resources")
-        .build()?;
+        .build()
+    {
+        Ok(result) => result,
+        Err(e) => {
+            error!("Failed to build context: {}", e);
+            return Err(e);
+        }
+    };
 
-    let state = GameState::new(&mut ctx)?;
+    info!("Game context created");
+
+    let state = match GameState::new(&mut ctx) {
+        Ok(state) => state,
+        Err(e) => {
+            error!("Failed to initialize game state: {}", e);
+            return Err(e);
+        }
+    };
+
+    info!("Game state initialized");
+
     event::run(ctx, event_loop, state)
-}
-
-fn clear_screen() {
-    // Example implementation for clearing the screen
-    println!("Clearing the screen");
-    // Replace with your graphics library call
-}
-
-fn present_frame() {
-    // Example implementation for presenting the frame
-    println!("Presenting the frame");
-    // Replace with your graphics library call
 }
