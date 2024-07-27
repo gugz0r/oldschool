@@ -1,22 +1,35 @@
+use ggez::{conf::WindowMode, conf::WindowSetup, ContextBuilder, GameResult};
+use ggez::event;
+use ggez::conf::Conf;
+
+
 mod camera;
-mod tiles;
+mod draw;
 mod game_state;
 mod input;
-mod draw;
+mod tiles;
 
-use ggez::conf::Conf;
-use ggez::event;
-use ggez::{ContextBuilder, GameResult};
-use crate::game_state::GameState;
+use game_state::GameState;
 
 fn main() -> GameResult {
-    let mut conf = Conf::new();
-    conf.modules.audio = false;
-
-    let (mut ctx, event_loop) = ContextBuilder::new("tilemap_engine", "gugz0r")
-        .default_conf(conf)
+    let (mut ctx, event_loop) = ContextBuilder::new("race_sim", "Author")
+        .window_mode(WindowMode::default())
+        .window_setup(WindowSetup::default().title("Race Simulation"))
+        .add_resource_path("./resources")
         .build()?;
 
     let state = GameState::new(&mut ctx)?;
     event::run(ctx, event_loop, state)
+}
+
+fn clear_screen() {
+    // Example implementation for clearing the screen
+    println!("Clearing the screen");
+    // Replace with your graphics library call
+}
+
+fn present_frame() {
+    // Example implementation for presenting the frame
+    println!("Presenting the frame");
+    // Replace with your graphics library call
 }

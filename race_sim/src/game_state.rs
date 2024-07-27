@@ -1,13 +1,12 @@
-// src/game_state.rs
-
-use ggez::graphics::Image;
-use ggez::{Context, GameResult};
 use ggez::event::EventHandler;
+use ggez::graphics::{self, Canvas, Color, Image};
+use ggez::input::keyboard::KeyCode;
+use ggez::Context;
+use ggez::GameResult;
 
 use crate::camera::Camera;
+use crate::draw;
 use crate::tiles::{Tile, Tilemap};
-use crate::input::handle_input;
-use crate::draw::{draw_road, draw_grass, draw_background};
 
 pub struct GameState {
     pub tilemap: Tilemap,
@@ -20,6 +19,7 @@ pub struct GameState {
 
 impl GameState {
     pub fn new(ctx: &mut Context) -> GameResult<Self> {
+        // Embed tile images
         let tile_image_bytes: Vec<Vec<u8>> = vec![
             include_bytes!("tiles/mountains.png").to_vec(),
         ];
@@ -34,7 +34,7 @@ impl GameState {
 
         let tilemap = Tilemap::new();
         let camera = Camera::new(0.0, 0.0, 800.0, 600.0);
-        let speed = 100.0; 
+        let speed = 100.0;
         let scroll = 0.0;
         let direction = 0.0;
 
@@ -47,13 +47,33 @@ impl GameState {
             direction,
         })
     }
+
+    pub fn handle_input(&mut self, ctx: &mut Context) {
+        self.direction = 0.0;
+
+        if ctx.keyboard.is_key_pressed(KeyCode::Left) {
+            self.direction = -1.0;
+        } else if ctx.keyboard.is_key_pressed(KeyCode::Right) {
+            self.direction = 1.0;
+        }
+
+        if ctx.keyboard.is_key_pressed(KeyCode::Up) {
+            self.speed += 1.0;
+        }
+        if ctx.keyboard.is_key_pressed(KeyCode::Down) {
+            self.speed -= 1.0;
+            if self.speed < 0.0 {
+                self.speed = 0.0;
+            }
+        }
+    }
 }
 
-impl EventHandler<ggez::GameError> for GameState {
+impl EventHandler for GameState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        handle_input(self, ctx);
+        self.handle_input(ctx);
 
-        let dt = ggez::timer::duration_to_f64(ggez::timer::delta(ctx)) as f32;
+        let dt = ctx.time.delta().as_secs_f32();
         self.scroll += self.speed * self.direction * dt;
         if self.scroll >= self.tiles[0].width {
             self.scroll -= self.tiles[0].width;
@@ -65,13 +85,25 @@ impl EventHandler<ggez::GameError> for GameState {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
-        ggez::graphics::clear(ctx, [0.0, 0.5, 1.0, 1.0].into()); 
+        let mut canvas = Canvas::from_frame(ctx, Color::new(0.0, 0.5, 1.0, 1.0));
 
-        draw_background(ctx, self)?;
-        draw_grass(ctx, self)?;
-        draw_road(ctx, self)?;
+        self.camera.x = -self.scroll;
 
-        ggez::graphics::present(ctx)?;
+        draw::draw_grass(ctx, &mut canvas, self)?;
+        draw::draw_perspective_road(ctx, &mut canvas, self)?;
+
+        let tile = &self.tiles[0];
+        let num_repeats = (800.0 / tile.width).ceil() as i32 + 1;
+
+        for i in 0..num_repeats {
+            let dest_x = i as f32 * tile.width - self.scroll;
+            canvas.draw(
+                &tile.image,
+                graphics::DrawParam::default().dest([dest_x, 0.0]),
+            );
+        }
+
+        canvas.finish(ctx)?;
         Ok(())
     }
 }
