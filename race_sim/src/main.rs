@@ -5,7 +5,8 @@ use ggez::{ContextBuilder, GameResult};
 use log::{error, info};
 
 mod camera;
-mod draw;
+mod draw_grass;
+mod draw_road;
 mod game_state;
 mod input;
 mod tiles;
@@ -20,7 +21,7 @@ fn main() -> GameResult {
     let (mut ctx, event_loop) = match ContextBuilder::new("race_sim", "gugz0r")
         .window_mode(WindowMode::default().dimensions(800.0, 600.0))
         .window_setup(WindowSetup::default().title("Race Simulation"))
-        .add_resource_path("./resources")
+        //.add_resource_path("./resources")
         .build()
     {
         Ok(result) => result,

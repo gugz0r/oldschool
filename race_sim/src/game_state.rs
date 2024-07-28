@@ -6,7 +6,8 @@ use ggez::GameResult;
 use log::info;
 
 use crate::camera::Camera;
-use crate::draw;
+use crate::draw_grass;
+use crate::draw_road;
 use crate::tiles::{Tile, Tilemap};
 
 pub struct GameState {
@@ -98,8 +99,8 @@ impl EventHandler for GameState {
 
         self.camera.x = -self.scroll;
 
-        draw::draw_grass(ctx, &mut canvas, self)?;
-        draw::draw_perspective_road(ctx, &mut canvas, self)?;
+        draw_grass::draw_grass(ctx, &mut canvas, self)?;
+        draw_road::draw_perspective_road(ctx, &mut canvas, self)?;
 
         let tile = &self.tiles[0];
         let num_repeats = (800.0 / tile.width).ceil() as i32 + 1;
